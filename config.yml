@@ -1,0 +1,7 @@
+port: 4567
+access_prefix: craftrest
+auth:
+  enable: false
+  user: foo
+  pass: br
+  

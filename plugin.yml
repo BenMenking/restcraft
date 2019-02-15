@@ -1,0 +1,5 @@
+name: Jsoncraft
+main: net.menking.alter_vue.jsonplugin.CraftRestPlugin
+version: 0.0.1
+author: Alter_Vue
+description: JSON REST API
