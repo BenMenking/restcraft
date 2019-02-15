@@ -27,7 +27,12 @@ public class PlayerSerializationHandler implements JsonSerializer<Player>, JsonD
         result.add("host", new JsonPrimitive(src.getAddress().getHostString()));
         result.add("port", new JsonPrimitive(src.getAddress().getPort()));
         result.add("exhaustion", new JsonPrimitive(src.getExhaustion()));
-        result.add("exp", new JsonPrimitive(src.getExp()));
+        result.add("exp_to_next_level", new JsonPrimitive(src.getExp()));
+        result.add("food_level", new JsonPrimitive(src.getFoodLevel()));
+        result.add("health_scale", new JsonPrimitive(src.getHealthScale()));
+        result.add("health", new JsonPrimitive(src.getHealth()));
+        result.add("total_exp", new JsonPrimitive(src.getTotalExperience()));
+        result.add("exp_level", new JsonPrimitive(src.getLevel()));
 
         return result;
     }
