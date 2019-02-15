@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.menking.alter_vue.jsonplugin;
 
 import com.google.gson.Gson;
@@ -19,8 +15,10 @@ import java.util.ArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.menking.alter_vue.gson.PlayerSerializationHandler;
+import net.menking.alter_vue.gson.ServerSerializationHandler;
 import net.menking.alter_vue.gson.WorldSerializationHandler;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -50,6 +48,7 @@ public class CraftRestPlugin extends JavaPlugin implements Listener, HttpHandler
         this.gson = new GsonBuilder()
                 .registerTypeAdapter(Player.class, new PlayerSerializationHandler())
                 .registerTypeAdapter(World.class, new WorldSerializationHandler())
+                .registerTypeAdapter(Server.class, new ServerSerializationHandler())
                 .create();
         
         try {
@@ -130,6 +129,10 @@ public class CraftRestPlugin extends JavaPlugin implements Listener, HttpHandler
             }
             result.add("worlds", arr);
         }
+        else if( t.getRequestURI().getPath().matches(".*/server") ) {
+            JsonArray arr = new JsonArray();
+            result.add("", this.gson.toJsonTree(getServer(), Server.class));
+        }
         else if( t.getRequestURI().getPath().matches(".*/player/(.*)") ) {
             getServer().getLogger().info("Matches on '" + t.getRequestURI().getPath() + "'");
             Pattern pattern = Pattern.compile(".*/player/(.*)");
@@ -138,7 +141,6 @@ public class CraftRestPlugin extends JavaPlugin implements Listener, HttpHandler
             String uuid = matcher.group(1);
             
             OfflinePlayer p = getServer().getOfflinePlayer(uuid);
-            
         }        
         else if(  t.getRequestURI().getPath().equalsIgnoreCase(getConfig().getString("access_prefix", "api") + "/subscribe") ) {
             
