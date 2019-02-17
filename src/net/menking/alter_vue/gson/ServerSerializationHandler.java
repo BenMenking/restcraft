@@ -1,23 +1,22 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package net.menking.alter_vue.gson;
 
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  *
  * @author bmenking
  */
-public class ServerSerializationHandler {
+public class ServerSerializationHandler implements JsonSerializer<Server>, JsonDeserializer<Server> { 
     public JsonElement serialize(Server src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
         result.add("max_players", new JsonPrimitive(src.getMaxPlayers()));
