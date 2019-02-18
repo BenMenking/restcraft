@@ -1,0 +1,7 @@
+{
+    "require": {
+        "amphp/http-server": "^1.0",
+        "youngj/httpserver": "^1.0",
+        "react/http": "^0.8.4"
+    }
+}

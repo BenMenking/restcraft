@@ -22,9 +22,15 @@ import java.util.HashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.UUID;
+import net.menking.alter_vue.gson.PlayerDeathEventSerializationHandler;
+import net.menking.alter_vue.gson.PlayerJoinEventSerializationHandler;
 import net.menking.alter_vue.gson.PlayerSerializationHandler;
 import net.menking.alter_vue.gson.ServerSerializationHandler;
 import net.menking.alter_vue.gson.WorldSerializationHandler;
+import net.menking.alter_vue.gson.OfflinePlayerSerializationHandler;
+import net.menking.alter_vue.gson.PlayerDeathEventSerializationHandler;
+import net.menking.alter_vue.gson.PlayerJoinEventSerializationHandler;
+import net.menking.alter_vue.gson.PlayerLoginEventSerializationHandler;
 import net.menking.alter_vue.jsonplugin.CraftRestPlugin;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
@@ -70,9 +76,12 @@ public class RestHandler implements HttpHandler {
                 .registerTypeAdapter(Player.class, new PlayerSerializationHandler())
                 .registerTypeAdapter(World.class, new WorldSerializationHandler())
                 .registerTypeAdapter(Server.class, new ServerSerializationHandler())
+                .registerTypeAdapter(OfflinePlayer.class, new OfflinePlayerSerializationHandler())
+                .registerTypeAdapter(PlayerDeathEvent.class, new PlayerDeathEventSerializationHandler())
+                .registerTypeAdapter(PlayerJoinEvent.class, new PlayerJoinEventSerializationHandler())
+                .registerTypeAdapter(PlayerLoginEvent.class, new PlayerLoginEventSerializationHandler())
                 .create();
-
-
+        
         this.channelPlayerJoin = new HashMap<String, String>();
         this.channelPlayerLeave = new HashMap<String, String>();
         this.channelPlayerDeath = new HashMap<String, String>();
@@ -220,7 +229,7 @@ public class RestHandler implements HttpHandler {
                     JsonArray arr = new JsonArray();
                     arr.add(this.gson.toJsonTree(event, PlayerLoginEvent.class));
                     
-                    String urlParameters  = arr.getAsString();
+                    String urlParameters  = arr.toString();
                     this.instance.getServer().getLogger().info("JSON: " + urlParameters);
                     byte[] postData       = urlParameters.getBytes( StandardCharsets.UTF_8 );
                     int    postDataLength = postData.length;
@@ -238,6 +247,7 @@ public class RestHandler implements HttpHandler {
                        wr.write( postData );
                     } 
                     conn.disconnect();
+                    this.instance.getServer().getLogger().info("Done sending PlayerLoginEvent to " + uri);
                 }
                 catch( MalformedURLException e) {
                     this.instance.getServer().getLogger().warning("Attempting to send to callback: " + e.getMessage());
@@ -301,20 +311,18 @@ public class RestHandler implements HttpHandler {
             result.add("player", arr);
         } else if (t.getRequestURI().getPath().matches(".*/subscribe/(.*)/(.*)")) {
             this.instance.getServer().getLogger().info("matched on subscribe");
-            Pattern pattern = Pattern.compile(".*/subscribe/(.*)/(.*)");
+            Pattern pattern = Pattern.compile(".*/subscribe/([^/]+)/(.*)");
             this.instance.getServer().getLogger().info("matched on subscribe2");
             Matcher matcher = pattern.matcher(t.getRequestURI().getPath());
-            this.instance.getServer().getLogger().info("matched on subscribe3");
+            this.instance.getServer().getLogger().info("matched on subscribe3 = " + Integer.toString(matcher.groupCount()));
             
-            for( int a = 0; a < matcher.groupCount(); a++ ) {
-                this.instance.getServer().getLogger().info("group " + Integer.toString(a) + " = " + matcher.group(a));
+            String channel = "";
+            String callback = "";
+            while( matcher.find() ) {
+                channel = matcher.group(1);
+                callback = matcher.group(2);
             }
-            
-            String channel = matcher.group(1);
-            this.instance.getServer().getLogger().info("matched on subscribe4");
-            String callback = matcher.group(2);
-            this.instance.getServer().getLogger().info("matched on subscribe5");
-            
+
             this.instance.getServer().getLogger().info("subscription request: " + channel + " @ " + callback);
             
             if( channel.equalsIgnoreCase("player_death") ) {

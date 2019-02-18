@@ -1,21 +1,21 @@
 package net.menking.alter_vue.gson;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.Player;
 
 /**
  *
  * @author bmenking
  */
-public class OfflinePlayerSerializationHandler {
+public class OfflinePlayerSerializationHandler implements JsonSerializer<OfflinePlayer>, JsonDeserializer<OfflinePlayer> {
     public JsonElement serialize(OfflinePlayer src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject result = new JsonObject();
         result.add("bed_spawn_location", new JsonPrimitive(src.getBedSpawnLocation().toString()));

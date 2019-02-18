@@ -27,8 +27,8 @@ public class PlayerLoginEventSerializationHandler implements JsonSerializer<Play
         JsonObject result = new JsonObject();
         result.add("uuid", new JsonPrimitive(src.getPlayer().getUniqueId().toString()));
         result.add("name", new JsonPrimitive(src.getPlayer().getDisplayName()));
-        result.add("host", new JsonPrimitive(src.getPlayer().getAddress().getHostString()));
-        result.add("port", new JsonPrimitive(src.getPlayer().getAddress().getPort()));
+        //result.add("host", new JsonPrimitive(src.getPlayer().getAddress().getHostString()));
+        //result.add("port", new JsonPrimitive(src.getPlayer().getAddress().getPort()));
         return result;
     }
 

@@ -2,3 +2,4 @@ build/*
 lib/*
 nbproject/*
 /dist/
+/test/vendor

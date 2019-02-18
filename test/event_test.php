@@ -1,4 +1,6 @@
 <?php
+require('vendor/autoload.php');
+
 error_reporting(E_ALL);
 
 /* Allow the script to hang around waiting for connections. */
@@ -9,8 +11,11 @@ set_time_limit(0);
 ob_implicit_flush();
 
 
+$address = '127.0.0.1';
+$port = 10000;
+
 $ch = curl_init();
-curl_setopt($ch, CURLOPT_URL, "http://192.168.28.26:4567/test/subscribe/player_login/" . urlencode("http://192.168.28.26:10000/"));
+curl_setopt($ch, CURLOPT_URL, "http://192.168.28.117:4567/test/subscribe/player_login/" . urlencode("http://$address:$port/"));
 curl_setopt($ch, CURLOPT_HEADER, false);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
@@ -21,50 +26,28 @@ curl_close($ch);
 
 echo "Got $response\n\n";
 
-$address = '192.168.28.26';
-$port = 10000;
+use Psr\Http\Message\ServerRequestInterface;
+use React\EventLoop\Factory;
+use React\Http\Response;
+use React\Http\Server;
 
-if (($sock = socket_create(AF_INET, SOCK_STREAM, SOL_TCP)) === false) {
-    echo "socket_create() failed: reason: " . socket_strerror(socket_last_error()) . "\n";
-}
+$loop = React\EventLoop\Factory::create();
 
-if (socket_bind($sock, $address, $port) === false) {
-    echo "socket_bind() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n";
-}
+$server = new Server(function (ServerRequestInterface $request) {
+    echo "Request {$request->getUri()->getPath()}\n";
 
-if (socket_listen($sock, 5) === false) {
-    echo "socket_listen() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n";
-}
+    return new Response(
+        200,
+        array(
+            'Content-Type' => 'text/plain'
+        ),
+        "Hello World!\n"
+    );
+});
 
-do {
-    if (($msgsock = socket_accept($sock)) === false) {
-        echo "socket_accept() failed: reason: " . socket_strerror(socket_last_error($sock)) . "\n";
-        break;
-    }
+$socket = new \React\Socket\Server("$address:$port", $loop);
+$server->listen($socket);
+echo 'Listening on ' . str_replace('tcp:', 'http:', $socket->getAddress()) . PHP_EOL;
 
-    do {
-        if (false === ($buf = socket_read($msgsock, 2048, PHP_NORMAL_READ))) {
-            echo "socket_read() failed: reason: " . socket_strerror(socket_last_error($msgsock)) . "\n";
-            break 2;
-        }
-        if (!$buf = trim($buf)) {
-            continue;
-        }
-        if ($buf == 'quit') {
-            break;
-        }
-        if ($buf == 'shutdown') {
-            socket_close($msgsock);
-            break 2;
-        }
-        $talkback = "PHP: You said '$buf'.\n";
-        socket_write($msgsock, $talkback, strlen($talkback));
-        echo "$buf\n";
-    } while (true);
-    socket_close($msgsock);
-} while (true);
-
-socket_close($sock);
-
-
+$loop->run();
 ?>
